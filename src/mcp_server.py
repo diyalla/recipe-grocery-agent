@@ -473,4 +473,32 @@ def remove_from_cart(product_id: str, zip_code: str = None) -> str:
 
 
 if __name__ == "__main__":
-    mcp.run()
+    import argparse
+
+    parser = argparse.ArgumentParser(description="Recipe & Grocery Intelligence Agent MCP Server")
+    parser.add_argument(
+        "--transport",
+        choices=["stdio", "streamable-http", "sse"],
+        default="streamable-http",
+        help="Transport type (default: streamable-http)"
+    )
+    parser.add_argument(
+        "--host",
+        default="127.0.0.1",
+        help="Host to bind to (default: 127.0.0.1)"
+    )
+    parser.add_argument(
+        "--port",
+        type=int,
+        default=8080,
+        help="Port to listen on (default: 8080)"
+    )
+    args = parser.parse_args()
+
+    if args.transport == "stdio":
+        mcp.run(transport="stdio")
+    else:
+        # Configure host and port via FastMCP settings
+        mcp.settings.host = args.host
+        mcp.settings.port = args.port
+        mcp.run(transport=args.transport)
