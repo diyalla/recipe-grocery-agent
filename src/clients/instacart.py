@@ -229,7 +229,7 @@ def search_products(
             item_image = view_section.get("itemImage") or {}
             image_url = item_image.get("url", "")
 
-            results.append({
+            product = {
                 "product_id": item.get("id", ""),
                 "product_name": item.get("name", ""),
                 "brand": item.get("brandName", ""),
@@ -242,7 +242,10 @@ def search_products(
                 "shop_id": shop_id,
                 "image_url": image_url,
                 "product_url": f"{BASE_URL}/products/{item.get('evergreenUrl', '')}",
-            })
+            }
+            if product["product_id"]:
+                _product_cache[product["product_id"]] = product
+            results.append(product)
 
     offset = (page - 1) * limit
     return results[offset:offset + limit]
@@ -304,6 +307,10 @@ def list_departments(postal_code: str = None) -> list[dict]:
 
 _local_cart = {}
 
+# Cache of product details keyed by product_id, populated by search_products.
+# Used to enrich cart display without extra API calls.
+_product_cache: dict[str, dict] = {}
+
 
 def add_to_cart(product_id: str, quantity: int = 1,
                 zip_code: str = None, store: str = None) -> dict:
@@ -340,13 +347,34 @@ def add_to_cart(product_id: str, quantity: int = 1,
 def get_cart(zip_code: str = None, store: str = None) -> dict:
     """
     Get current cart contents.
-    Returns local demo cart state.
+    Returns local demo cart state, enriched with product names and prices
+    from the search cache where available.
     """
-    items = list(_local_cart.values())
+    items = []
+    subtotal = 0.0
+    subtotal_known = False
+
+    for entry in _local_cart.values():
+        pid = entry["product_id"]
+        cached = _product_cache.get(pid, {})
+        item = {
+            "product_id": pid,
+            "product_name": cached.get("product_name") or "Unknown product",
+            "brand": cached.get("brand") or "",
+            "size": cached.get("size") or "",
+            "price": cached.get("price") or "",
+            "price_value": cached.get("price_value"),
+            "quantity": entry["quantity"],
+        }
+        if item["price_value"] is not None:
+            subtotal += item["price_value"] * entry["quantity"]
+            subtotal_known = True
+        items.append(item)
+
     return {
         "items": items,
         "item_count": sum(i["quantity"] for i in items),
-        "subtotal": None,
+        "subtotal": round(subtotal, 2) if subtotal_known else None,
         "note": "Using local demo cart — real cart requires authentication",
     }
 
