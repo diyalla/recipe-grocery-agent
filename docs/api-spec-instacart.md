@@ -7,24 +7,33 @@ Network tab while searching for "chicken breast" on instacart.com.
 ## Anti-Bot Measures Encountered
 
 ### JavaScript Session Cookie
-Instacart sets `__Host-instacart_sid` via JavaScript execution. This cookie
-is required for full pricing data and authenticated cart operations.
+Instacart sets `__Host-instacart_sid` via JavaScript execution after page load.
+This cookie is required for full pricing data and authenticated cart operations.
 
-**Problem:** Plain Python HTTP requests cannot execute JavaScript, so we
-cannot obtain this cookie without a headless browser (e.g. Playwright/Selenium).
+**Problem:** Plain Python HTTP requests cannot execute JavaScript.
 
-**Impact:** Product search works (names, availability). Pricing data is
-limited or absent for some products. Cart mutations (add/remove) require
-this cookie and fall back to a local demo cart.
+**Solution:** We use Playwright (headless Chromium) to load the page, wait for
+JavaScript to run, then extract all cookies including `__Host-instacart_sid`.
+The cookies are persisted to `data/instacart_session.json` and reused for up
+to 1 hour before refreshing.
 
-**What we tried:**
-- Plain requests with homepage cookie warmup → Search works, pricing limited
+**Implementation:** See `src/auth.py` for the full Playwright authentication flow.
+
+```python
+# Simplified auth flow
+with sync_playwright() as p:
+    browser = p.chromium.launch(headless=True)
+    page = browser.new_page()
+    page.goto("https://www.instacart.com", wait_until="domcontentloaded")
+    time.sleep(3)  # Wait for JS to set session cookies
+    cookies = browser.context.cookies()
+    sid = next(c for c in cookies if c["name"] == "__Host-instacart_sid")
+```
+
+**What we tried before Playwright:**
+- Plain requests with homepage cookie warmup → Search works, no pricing
 - Session persists 5 cookies from homepage: device_uuid, privacy_opt_out,
-  ahoy_visit, ahoy_track, ahoy_visitor
-
-**What we would do with more time:**
-Use Playwright (headless browser) to obtain the full session cookie,
-then pass it to our requests client.
+  ahoy_visit, ahoy_track, ahoy_visitor — but not __Host-instacart_sid
 
 ---
 
@@ -32,9 +41,9 @@ then pass it to our requests client.
 
 Instacart uses **GraphQL with Persisted Queries**.
 
-Instead of sending full GraphQL query text, the browser sends a
-`sha256Hash` that the server maps to a stored query. This is a
-performance optimization that also makes reverse engineering harder.
+Instead of sending full GraphQL query text, the browser sends a sha256Hash
+that the server maps to a stored query. This is a performance optimization
+that also makes reverse engineering harder.
 
 **GraphQL Endpoint:** `https://www.instacart.com/graphql`
 **Method:** GET (not POST — discovered via browser analysis)
@@ -57,11 +66,12 @@ of our initial 400 Bad Request errors.
 edb3181e1e0bf2b2b8e377d2c2082b82eee2448a4bf417a3ca549647a39b28d5
 
 **Query Parameters:**
+
 | Parameter | Type | Description |
 |-----------|------|-------------|
-| `operationName` | string | `SearchCrossRetailerGroupResults` |
-| `variables` | JSON string | URL-encoded variables object |
-| `extensions` | JSON string | Contains persistedQuery hash |
+| operationName | string | SearchCrossRetailerGroupResults |
+| variables | JSON string | URL-encoded variables object |
+| extensions | JSON string | Contains persistedQuery hash |
 
 **Variables Object:**
 ```json
@@ -70,7 +80,7 @@ edb3181e1e0bf2b2b8e377d2c2082b82eee2448a4bf417a3ca549647a39b28d5
   "searchSource": "cross_retailer_search",
   "query": "chicken breast",
   "pageViewId": "<uuid-v4>",
-  "shopIds": ["9501", "12", "7517", ...],
+  "shopIds": ["9501", "12", "7517", "..."],
   "disableAutocorrect": false,
   "includeDebugInfo": false,
   "autosuggestImpressionId": null,
@@ -81,17 +91,17 @@ edb3181e1e0bf2b2b8e377d2c2082b82eee2448a4bf417a3ca549647a39b28d5
 }
 ```
 
-**Important:** `pageViewId` must be a fresh UUID per request.
-`shopIds` must be a non-empty list — discovered from browser traffic.
-Empty array causes the request to return no results.
+**Important notes:**
+- pageViewId must be a fresh UUID per request
+- shopIds must be a non-empty list discovered from browser traffic
+- Empty shopIds array causes the request to return no results
 
-**Response Schema:**
+**Example Response:**
 ```json
 {
   "data": {
     "searchCrossRetailerGroupResults": {
       "term": "chicken breast",
-      "searchId": "<uuid>",
       "results": [
         {
           "retailerId": "542",
@@ -101,23 +111,14 @@ Empty array causes the request to return no results.
               "id": "items_31529-19831039",
               "name": "Boneless Skinless Chicken Breast Max Pack",
               "size": "2.5 lb",
-              "productId": "19831039",
-              "brandName": null,
-              "evergreenUrl": "19831039-peco-foods-...",
               "availability": {
                 "available": true,
                 "stockLevel": "inStock"
               },
               "price": {
                 "viewSection": {
-                  "priceString": "$2.99",
-                  "priceValueString": "2.99",
-                  "fullPriceString": "$4.99"
-                }
-              },
-              "viewSection": {
-                "itemImage": {
-                  "url": "https://d2lnr5mha7bycj.cloudfront.net/..."
+                  "priceString": "$4.99",
+                  "priceValueString": "4.99"
                 }
               }
             }
@@ -131,22 +132,19 @@ Empty array causes the request to return no results.
 
 ---
 
-### 2. Get Product Details (Items operation)
+### 2. Get Product Details
 
-**Operation:** `Items`
+**Operation:** Items
 **Method:** GET
-
-**Persisted Query Hash:** Discovered but not fully implemented.
-Requires `ids` array in format `items_SHOPID-PRODUCTID` and
-`__Host-instacart_sid` session cookie for full data.
+**Status:** Requires __Host-instacart_sid — falls back to search-based lookup
 
 ---
 
 ### 3. Cart Operations
 
-**Operations discovered:** `ActiveCartId`, `CartData`
-**Status:** Requires `__Host-instacart_sid` — not implemented
-**Fallback:** Local in-memory demo cart used instead
+**Operations discovered:** ActiveCartId, CartData
+**Status:** Requires full GraphQL mutation with authenticated session
+**Current implementation:** Local demo cart with product name and price tracking
 
 ---
 
@@ -168,57 +166,58 @@ sec-fetch-site:      same-origin
 
 ## Authentication
 
-### What is required
-- `__Host-instacart_sid` — main session cookie, set by JavaScript
-- `device_uuid` — device identifier cookie
-- `ahoy_visit` / `ahoy_visitor` — analytics cookies
+### Tier 1 — Unauthenticated (basic session)
+Obtained via plain HTTP request to homepage.
+Cookies: device_uuid, ahoy_visit, ahoy_visitor, privacy_opt_out, ahoy_track
+Result: Product names and availability only. No pricing.
 
-### What we obtain
-- `device_uuid`, `ahoy_visit`, `ahoy_visitor` via homepage GET request
-- Missing: `__Host-instacart_sid` (requires JavaScript/headless browser)
+### Tier 2 — Playwright session (what we implement)
+Obtained via headless Chromium browser.
+Additional cookies: __Host-instacart_sid, X-IC-bcx, forterToken, and ~25 others
+Result: Full pricing data available. Product search returns real prices.
 
-### Impact of missing auth
-- Product search: Works (names, availability, some pricing)
-- Pricing: Limited — some products show no price
-- Cart operations: Fall back to local demo cart
-- Product details: Basic info only
+### Session Persistence
+Cookies saved to `data/instacart_session.json` with timestamp.
+Reused for up to 1 hour. Auto-refreshed by calling `get_instacart_session()`.
+
+### Session Expiry Detection
+```python
+if response.status_code == 403:
+    raise RuntimeError("Instacart 403 — session expired, refresh needed")
+```
 
 ---
 
 ## Response Compression
 
-Instacart uses **Brotli compression** (`Content-Encoding: br`).
-Requires `pip install brotli` for Python's `requests` library to
-decompress responses automatically.
+Instacart uses Brotli compression (Content-Encoding: br).
+Requires `pip install brotli` for Python requests to decompress automatically.
 
 ---
 
 ## Known Limitations
 
-1. **No full auth without headless browser.** The `__Host-instacart_sid`
-   cookie requires JavaScript execution. Full pricing and cart operations
-   need this cookie.
+1. ShopIds are region-specific. The list was discovered from a San Francisco
+   area session. Different regions may have different store availability.
 
-2. **ShopIds are region-specific.** The list of shop IDs was discovered
-   from a San Francisco area session. Different regions have different
-   store availability.
+2. Persisted query hashes may change on Instacart deploys. The sha256 hash
+   should be re-discovered if requests start returning errors.
 
-3. **Persisted query hashes may change.** If Instacart deploys a new
-   version, the sha256 hash for our operations may change, breaking
-   our client. The hash should be re-discovered periodically.
+3. No pagination in cross-retailer search. The first parameter controls
+   results per retailer, not total results.
 
-4. **No pagination in cross-retailer search.** The `first` parameter
-   controls results per retailer (not total). Pagination across all
-   retailers is not straightforward.
+4. Store name not in search response. Cannot reliably filter by store name.
 
-5. **Store name not in search response.** We cannot reliably filter
-   by store name from the SearchCrossRetailerGroupResults response.
-   A separate retailer lookup would be needed.
+5. Cart operations use local demo cart. Real cart mutations require
+   authenticated GraphQL operations not yet implemented.
+
+6. Playwright detection risk. Instacart may detect headless browsers.
+   We mitigate with realistic user agent and viewport settings.
 
 ---
 
 ## Rate Limiting
 
-No explicit rate limiting encountered. Requests complete in
-~800-1300ms (server-side processing time visible in Server-Timing header).
-We add a 1-second delay on session warmup as a courtesy.
+No explicit rate limiting encountered. Requests complete in 800-1300ms.
+We add exponential backoff on 429 responses and a 1-second delay on
+session warmup as a courtesy.
