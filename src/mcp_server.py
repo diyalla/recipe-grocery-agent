@@ -342,7 +342,8 @@ def compare_recipes(
 ) -> str:
     """
     Compare 2-3 recipes side by side with a deduplicated combined
-    shopping list and shared ingredients highlighted.
+    shopping list, shared ingredients highlighted, and per-recipe
+    cost estimates.
 
     Args:
         recipe_ids: List of 2-3 Allrecipes recipe IDs to compare
@@ -363,6 +364,9 @@ def compare_recipes(
             continue
 
         parsed_ingredients = []
+        recipe_cost = 0.0
+        recipe_cost_breakdown = []
+
         for raw in recipe.get("ingredients_raw", []):
             parsed = parse_ingredient(raw)
             parsed_ingredients.append({
@@ -372,6 +376,27 @@ def compare_recipes(
                 "unit": parsed.unit
             })
 
+            # Estimate cost for this ingredient
+            search_query = parsed.item if parsed.item else raw
+            try:
+                products = ic_search(query=search_query, zip_code=zip_code, limit=3)
+                matched = next(
+                    (p for p in products
+                     if p.get("available") and p.get("price_value")),
+                    None
+                )
+                if matched:
+                    recipe_cost += matched["price_value"]
+                    recipe_cost_breakdown.append({
+                        "ingredient": parsed.item or raw,
+                        "matched_product": matched["product_name"],
+                        "price": matched["price"],
+                        "price_value": matched["price_value"],
+                    })
+            except Exception:
+                pass
+
+            # Add to combined shopping list
             item_key = (parsed.item or raw).lower().strip()
             if item_key not in all_ingredients:
                 all_ingredients[item_key] = {
@@ -394,7 +419,10 @@ def compare_recipes(
             "nutrition": recipe.get("nutrition"),
             "url": recipe.get("url"),
             "ingredient_count": len(parsed_ingredients),
-            "ingredients": parsed_ingredients
+            "ingredients": parsed_ingredients,
+            "estimated_cost": round(recipe_cost, 2),
+            "cost_breakdown": recipe_cost_breakdown,
+            "cost_note": "Per package pricing — unit conversion not applied",
         })
 
     shared = [
@@ -402,12 +430,21 @@ def compare_recipes(
         if len(item["used_in"]) > 1
     ]
 
+    # Combined cost estimate (shared ingredients counted once)
+    combined_cost = sum(r.get("estimated_cost", 0) for r in recipes)
+
     return json.dumps({
         "recipes": recipes,
         "combined_shopping_list": list(all_ingredients.values()),
         "shared_ingredients": shared,
         "total_unique_ingredients": len(all_ingredients),
-        "note": "Quantities are per recipe and not merged"
+        "combined_estimated_cost": round(combined_cost, 2),
+        "note": "Quantities are per recipe and not merged. Shared ingredients counted per recipe.",
+        "limitations": [
+            "Prices are per package as listed on Instacart",
+            "Unit conversion not applied",
+            "Full pricing requires Instacart authentication"
+        ]
     }, indent=2)
 
 

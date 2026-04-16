@@ -200,8 +200,9 @@ def get_recipe(recipe_id: str = None, url: str = None) -> dict:
         and len(el.get_text(strip=True)) > 20
     ]
 
-    # Times — label/value pairs like "Prep Time: 15 mins"
+    # Times and servings — label/value pairs like "Prep Time: 15 mins" or "Servings: 4"
     times = {}
+    servings = None
     for label_el in soup.select(".mm-recipes-details__label"):
         label = label_el.get_text(strip=True).lower()
         value_el = label_el.find_next_sibling()
@@ -213,10 +214,8 @@ def get_recipe(recipe_id: str = None, url: str = None) -> dict:
                 times["cook_time"] = value
             elif "total" in label:
                 times["total_time"] = value
-
-    # Servings
-    servings_el = soup.select_one(".mm-recipes-details__value")
-    servings = servings_el.get_text(strip=True) if servings_el else None
+            elif "serving" in label:
+                servings = value
 
     # Rating
     rating_el = soup.select_one(".mm-recipes-review-bar__rating")

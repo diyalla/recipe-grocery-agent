@@ -334,16 +334,16 @@ def run_demo():
     demo_messages = [
         # Step 1 — search recipes
         "I want to cook Pad Thai this weekend. Find me a good recipe.",
-        # Step 2 — get full recipe
-        f"Let's go with the Classic Pad Thai (recipe ID {PAD_THAI_ID}). Get me the full recipe details.",
+        # Step 2 — pick a recipe
+        "Let's go with the first one. Show me the full recipe details.",
         # Step 3 — estimate cost
-        f"How much will the ingredients cost me at Safeway? ZIP code is 94105.",
+        "How much will the ingredients cost me at Safeway? I'm in zip code 94105.",
         # Step 4 — substitution
-        "I'm allergic to peanuts. What can I substitute? Use reason=allergy and dietary_constraint=nut-free.",
+        "I'm allergic to peanuts. What can I substitute?",
         # Step 5 — compare recipes
-        f"Also find me the Thai Green Curry Chicken recipe (ID {GREEN_CURRY_ID}) and compare it with the Pad Thai (ID {PAD_THAI_ID}). Call compare_recipes with both IDs and show me the combined shopping list.",
-        # Step 6 — add to cart and show cart
-        "Great. Search Instacart for rice noodles and chicken breast, add the first result of each to my cart, then show me the final cart contents.",
+        "Also find me a good green curry recipe and compare the two. What's my total shopping list going to look like?",
+        # Step 6 — add to cart
+        "Great, add the rice noodles and chicken breast to my Instacart cart and show me what's in my cart.",
     ]
 
     for user_message in demo_messages:
@@ -362,17 +362,25 @@ def run_demo():
             cart_data = json.loads(get_cart())
             items = cart_data.get("items", [])
             item_count = cart_data.get("item_count", 0)
+            subtotal = cart_data.get("subtotal")
             response = (
                 f"I've added items to your cart! Here are the final contents:\n\n"
-                f"**Cart Summary:**\n"
-                f"- Total items: {item_count}\n"
+                f"**Cart ({item_count} items):**\n"
             )
             for item in items:
-                response += f"- Product ID: {item['product_id']} × {item['quantity']}\n"
+                name = item.get('product_name', item['product_id'])
+                qty = item['quantity']
+                price = item.get('unit_price')
+                line = item.get('line_total')
+                if price:
+                    response += f"- {name} × {qty} @ ${price:.2f} = ${line:.2f}\n"
+                else:
+                    response += f"- {name} × {qty}\n"
+            if subtotal:
+                response += f"\n**Subtotal: ${subtotal:.2f}**\n"
             response += (
                 f"\n**Note:** Using local demo cart — "
-                f"real Instacart cart requires full authentication "
-                f"(__Host-instacart_sid session cookie)."
+                f"real Instacart cart requires full Playwright authentication."
             )
 
         print(f"\nAgent: {response}")

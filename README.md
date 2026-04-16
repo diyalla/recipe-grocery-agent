@@ -34,8 +34,17 @@ and stay informed about relevant food and grocery updates.
 
 ## How to Run
 
-### Start the MCP foreground server
+### Start the MCP foreground server (HTTP transport, default)
    python src/mcp_server.py
+
+### Start on a custom port
+   python src/mcp_server.py --transport streamable-http --port 8080
+
+### Start with stdio transport (for direct AI agent connection)
+   python src/mcp_server.py --transport stdio
+
+### Start with SSE transport
+   python src/mcp_server.py --transport sse --port 8080
 
 ### Run the background worker once
    python src/worker.py --once
