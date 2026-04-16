@@ -5,6 +5,8 @@ venv/
 __pycache__/
 *.pyc
 *.pyo
+*.pyd
+.pytest_cache/
 
 # Data files (worker state)
 data/
@@ -16,8 +18,9 @@ data/
 # VS Code
 .vscode/
 
-# Test files we created
-test_tools.py
+# macOS
+.DS_Store
 
 # Config with real values
-# (keep config.json.example but not config.json if it has real data)
+# config.json.example is safe to commit
+# config.json may contain real zip codes — exclude if sensitive

@@ -114,6 +114,23 @@ def search_recipes(
         if img_el:
             image_url = img_el.get("data-src") or img_el.get("src", "")
 
+        # Apply post-fetch filters
+        if dietary:
+            dietary_keywords = {
+                "vegetarian": ["vegetarian", "veggie"],
+                "vegan": ["vegan"],
+                "gluten-free": ["gluten-free", "gluten free"],
+                "dairy-free": ["dairy-free", "dairy free"],
+                "keto": ["keto"],
+            }
+            keywords = dietary_keywords.get(dietary.lower(), [dietary.lower()])
+            if not any(k in title.lower() for k in keywords):
+                continue
+
+        if cuisine:
+            if cuisine.lower() not in title.lower():
+                continue
+
         results.append({
             "recipe_id": doc_id,
             "title": title,
@@ -170,16 +187,21 @@ def get_recipe(recipe_id: str = None, url: str = None) -> dict:
             ingredients_raw.append(text)
 
     # Instructions — paragraph tags in the recipe steps section
-    instruction_els = soup.select(".comp.mntl-sc-block-html p")
+    # Selector updated from .comp.mntl-sc-block-html p after Allrecipes
+    # updated their HTML structure (discovered April 2026)
+    instruction_els = soup.select("[class*=step] p")
     instructions = [
         el.get_text(strip=True)
         for el in instruction_els
         if el.get_text(strip=True)
+        and "dotdash" not in el.get_text(strip=True).lower()
+        and "food studios" not in el.get_text(strip=True).lower()
+        and "meredith" not in el.get_text(strip=True).lower()
+        and len(el.get_text(strip=True)) > 20
     ]
 
-    # Times and servings — label/value pairs like "Prep Time: 15 mins" or "Servings: 4"
+    # Times — label/value pairs like "Prep Time: 15 mins"
     times = {}
-    servings = None
     for label_el in soup.select(".mm-recipes-details__label"):
         label = label_el.get_text(strip=True).lower()
         value_el = label_el.find_next_sibling()
@@ -191,8 +213,10 @@ def get_recipe(recipe_id: str = None, url: str = None) -> dict:
                 times["cook_time"] = value
             elif "total" in label:
                 times["total_time"] = value
-            elif "serving" in label:
-                servings = value
+
+    # Servings
+    servings_el = soup.select_one(".mm-recipes-details__value")
+    servings = servings_el.get_text(strip=True) if servings_el else None
 
     # Rating
     rating_el = soup.select_one(".mm-recipes-review-bar__rating")
