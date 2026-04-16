@@ -415,7 +415,10 @@ def compare_recipes(
 def add_to_cart(
     product_id: str,
     quantity: int = 1,
-    zip_code: str = None
+    zip_code: str = None,
+    product_name: str = None,
+    unit_price: float = None,
+    product_size: str = None
 ) -> str:
     """
     Add a product to the Instacart cart.
@@ -425,11 +428,17 @@ def add_to_cart(
         product_id: Instacart product ID to add
         quantity: Number of units to add, default 1
         zip_code: ZIP code for store context
+        product_name: Optional product name to store with cart item
+        unit_price: Optional unit price to store with cart item
+        product_size: Optional product size to store with cart item
     """
     result = ic_add_to_cart(
         product_id=product_id,
         quantity=quantity,
-        zip_code=zip_code
+        zip_code=zip_code,
+        product_name=product_name,
+        unit_price=unit_price,
+        product_size=product_size
     )
     return json.dumps(result, indent=2)
 

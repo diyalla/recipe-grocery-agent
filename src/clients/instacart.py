@@ -184,8 +184,6 @@ def search_products(
     flattened into a single list.
 
     Known limitations:
-    - Full session auth requires JavaScript execution
-    - Without __Host-instacart_sid some stores return empty item arrays
     - Shop IDs are hardcoded from SF area discovery session
     - Store name filtering is not available in the response data
     - Postal code affects pricing but shopIds list may not match your area
@@ -230,27 +228,23 @@ def search_products(
         shop_id = retailer_group.get("shopId", "")
 
         for item in retailer_group.get("items", []):
-            # Skip None or items with no name
             if not item or not item.get("name"):
                 continue
 
-            # Safely extract price — can be None for some items
             price_data = item.get("price") or {}
             price_section = price_data.get("viewSection") or {}
             price_str = price_section.get("priceString", "")
             price_value = price_section.get("priceValueString", "")
 
-            # Safely extract availability
             availability = item.get("availability") or {}
             available = availability.get("available", False)
             stock_level = availability.get("stockLevel", "unknown")
 
-            # Safely extract image
             view_section = item.get("viewSection") or {}
             item_image = view_section.get("itemImage") or {}
             image_url = item_image.get("url", "")
 
-            product = {
+            results.append({
                 "product_id": item.get("id", ""),
                 "product_name": item.get("name", ""),
                 "brand": item.get("brandName", ""),
@@ -263,10 +257,7 @@ def search_products(
                 "shop_id": shop_id,
                 "image_url": image_url,
                 "product_url": f"{BASE_URL}/products/{item.get('evergreenUrl', '')}",
-            }
-            if product["product_id"]:
-                _product_cache[product["product_id"]] = product
-            results.append(product)
+            })
 
     offset = (page - 1) * limit
     return results[offset:offset + limit]
@@ -278,7 +269,6 @@ def get_product_details(product_id: str = None, url: str = None) -> dict:
 
     Falls back to search-based lookup since the Items GraphQL operation
     requires a valid authenticated session with __Host-instacart_sid.
-    This is a known limitation documented in api-spec-instacart.md.
     """
     if not product_id and not url:
         raise ValueError("Must provide either product_id or url")
@@ -322,44 +312,65 @@ def list_departments(postal_code: str = None) -> list[dict]:
 
 # -------------------------------------------------------
 # Cart operations
-# Without __Host-instacart_sid we use a local demo cart.
-# Real cart operations require authenticated Instacart session.
+# We maintain a local demo cart that stores product details
+# including name and price at time of adding.
+# Real Instacart cart mutations require authenticated GraphQL
+# operations (CartData, ActiveCartId) which need the full
+# session. We use local cart for demo purposes.
 # -------------------------------------------------------
 
 _local_cart = {}
 
-# Cache of product details keyed by product_id, populated by search_products.
-# Used to enrich cart display without extra API calls.
-_product_cache: dict[str, dict] = {}
-
 
 def add_to_cart(product_id: str, quantity: int = 1,
-                zip_code: str = None, store: str = None) -> dict:
+                zip_code: str = None, store: str = None,
+                product_name: str = None, unit_price: float = None,
+                product_size: str = None) -> dict:
     """
     Add a product to the cart.
+    Accepts optional product details to store with the cart item.
+    If not provided, attempts to look up the product.
 
     DESTRUCTIVE OPERATION — modifies cart state.
-
-    Uses local demo cart since real Instacart cart mutations require
-    the __Host-instacart_sid session cookie which needs JavaScript.
-    Real implementation would use the ActiveCartId + CartData GraphQL
-    operations discovered during API analysis.
+    Uses local demo cart — real cart requires authentication.
     """
     if not product_id:
         raise ValueError("product_id is required")
+
+    # If details not passed in, try to look them up
+    if not product_name:
+        try:
+            # Extract the numeric product ID and search for it
+            numeric_id = product_id.split("-")[-1] if "-" in product_id else product_id
+            results = search_products(numeric_id, zip_code=zip_code, limit=10)
+            for r in results:
+                if r.get("product_id") == product_id:
+                    product_name = r.get("product_name", product_id)
+                    unit_price = r.get("price_value")
+                    product_size = r.get("size")
+                    break
+        except Exception:
+            pass
+
+    # Final fallback for name
+    if not product_name:
+        product_name = product_id
 
     if product_id in _local_cart:
         _local_cart[product_id]["quantity"] += quantity
     else:
         _local_cart[product_id] = {
             "product_id": product_id,
+            "product_name": product_name,
             "quantity": quantity,
+            "unit_price": unit_price,
+            "size": product_size,
             "added_at": time.time()
         }
 
     return {
         "success": True,
-        "message": f"Added {quantity}x {product_id} to cart",
+        "message": f"Added {quantity}x {product_name} to cart",
         "note": "Using local demo cart — real cart requires authentication",
         "cart": get_cart()
     }
@@ -367,36 +378,39 @@ def add_to_cart(product_id: str, quantity: int = 1,
 
 def get_cart(zip_code: str = None, store: str = None) -> dict:
     """
-    Get current cart contents.
-    Returns local demo cart state, enriched with product names and prices
-    from the search cache where available.
+    Get current cart contents with per-item prices and subtotal.
     """
     items = []
     subtotal = 0.0
-    subtotal_known = False
+    has_pricing = True
 
-    for entry in _local_cart.values():
-        pid = entry["product_id"]
-        cached = _product_cache.get(pid, {})
-        item = {
-            "product_id": pid,
-            "product_name": cached.get("product_name") or "Unknown product",
-            "brand": cached.get("brand") or "",
-            "size": cached.get("size") or "",
-            "price": cached.get("price") or "",
-            "price_value": cached.get("price_value"),
-            "quantity": entry["quantity"],
-        }
-        if item["price_value"] is not None:
-            subtotal += item["price_value"] * entry["quantity"]
-            subtotal_known = True
-        items.append(item)
+    for item in _local_cart.values():
+        unit_price = item.get("unit_price")
+        quantity = item.get("quantity", 1)
+
+        if unit_price is not None:
+            line_total = round(unit_price * quantity, 2)
+            subtotal += line_total
+        else:
+            line_total = None
+            has_pricing = False
+
+        items.append({
+            "product_id": item["product_id"],
+            "product_name": item.get("product_name", item["product_id"]),
+            "quantity": quantity,
+            "unit_price": unit_price,
+            "line_total": line_total,
+            "size": item.get("size"),
+        })
 
     return {
         "items": items,
-        "item_count": sum(i["quantity"] for i in items),
-        "subtotal": round(subtotal, 2) if subtotal_known else None,
-        "note": "Using local demo cart — real cart requires authentication",
+        "item_count": sum(i["quantity"] for i in _local_cart.values()),
+        "subtotal": round(subtotal, 2) if has_pricing else None,
+        "currency": "USD",
+        "note": "Using local demo cart — real Instacart cart requires authentication",
+        "pricing_complete": has_pricing,
     }
 
 
@@ -404,17 +418,17 @@ def remove_from_cart(product_id: str,
                      zip_code: str = None, store: str = None) -> dict:
     """
     Remove a product from the cart.
-
     DESTRUCTIVE OPERATION — modifies cart state.
     """
     if not product_id:
         raise ValueError("product_id is required")
 
     if product_id in _local_cart:
+        removed_name = _local_cart[product_id].get("product_name", product_id)
         del _local_cart[product_id]
         return {
             "success": True,
-            "message": f"Removed {product_id} from cart",
+            "message": f"Removed {removed_name} from cart",
             "cart": get_cart()
         }
 
