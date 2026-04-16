@@ -56,21 +56,42 @@ SESSION = requests.Session()
 
 def _ensure_session():
     """
-    Visit Instacart homepage to pick up cookies.
+    Establish Instacart session with full authentication.
 
-    Note: The __Host-instacart_sid session cookie requires JavaScript
-    execution and cannot be obtained with plain HTTP requests.
-    This is a known limitation documented in api-spec-instacart.md.
-    Without this cookie, some features may be limited.
+    Strategy:
+    1. Try to load saved Playwright session from disk (fast)
+    2. If expired or missing, launch headless browser to get fresh cookies
+    3. Fall back to plain HTTP session if Playwright fails
+
+    The __Host-instacart_sid cookie unlocks full pricing data.
     """
-    if not SESSION.cookies:
-        print("Warming up Instacart session...")
+    if SESSION.cookies.get("__Host-instacart_sid"):
+        return  # Already have full session
+
+    print("Warming up Instacart session...")
+
+    # Try Playwright auth first
+    try:
+        from src.auth import get_instacart_session, apply_session_to_requests
+        cookies = get_instacart_session()
+        if cookies and cookies.get("__Host-instacart_sid"):
+            apply_session_to_requests(SESSION, cookies)
+            print("  Full Instacart session established via Playwright")
+            return
+    except Exception as e:
+        print(f"  Playwright auth failed: {e}. Falling back to basic session.")
+
+    # Fallback: plain HTTP session
+    try:
         SESSION.get(
             BASE_URL,
             headers={"User-Agent": HEADERS["User-Agent"], "Accept": "text/html"},
             timeout=15
         )
         time.sleep(1)
+        print("  Basic session established (pricing may be limited)")
+    except Exception as e:
+        print(f"  Session warmup failed: {e}")
 
 
 def _graphql_get(operation_name: str, variables: dict, sha256_hash: str) -> dict:
