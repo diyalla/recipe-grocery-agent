@@ -1,0 +1,23 @@
+# Virtual environment
+venv/
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+
+# Data files (worker state)
+data/
+
+# Environment files
+.env
+.env.local
+
+# VS Code
+.vscode/
+
+# Test files we created
+test_tools.py
+
+# Config with real values
+# (keep config.json.example but not config.json if it has real data)

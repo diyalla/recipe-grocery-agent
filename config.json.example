@@ -1,0 +1,10 @@
+{
+  "saved_recipe_ids": [
+    "42968",
+    "222350"
+  ],
+  "dietary_preferences": [],
+  "price_change_threshold_percent": 10.0,
+  "zip_code": "94105",
+  "check_interval_seconds": 3600
+}
