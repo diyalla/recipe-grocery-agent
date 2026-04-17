@@ -340,14 +340,15 @@ def run_once(config: dict = None) -> dict:
     Run one complete worker cycle.
 
     1. Load config and state
-    2. Check ingredient prices
-    3. Check trending recipes
+    2. Check ingredient prices (Instacart)
+    3. Check trending recipes (Allrecipes)
     4. Save all new digests
     5. Update and save state
     6. Return summary
 
+    Per challenge requirements: if one platform fails, we report
+    the error and continue checking the other platform.
     This function is idempotent — safe to call multiple times.
-    If it crashes partway through, digests already saved won't be duplicated.
     """
     if config is None:
         config = load_config()
@@ -361,26 +362,71 @@ def run_once(config: dict = None) -> dict:
 
     all_digests = []
     errors = []
+    platform_status = {
+        "instacart": "ok",
+        "allrecipes": "ok",
+    }
 
-    # Check price changes
-    print("\n[1/2] Checking ingredient prices...")
+    # Step 1: Check price changes via Instacart
+    print("\n[1/2] Checking ingredient prices (Instacart)...")
     try:
         price_digests = check_price_changes(config, state)
         all_digests.extend(price_digests)
+        print(f"  Instacart: OK — {len(price_digests)} price digest(s) produced")
     except Exception as e:
-        error_msg = f"Price check failed: {e}"
+        error_msg = f"Instacart price check failed: {e}"
         print(f"  ERROR: {error_msg}")
+        print("  Continuing to Allrecipes check...")
         errors.append(error_msg)
+        platform_status["instacart"] = f"error: {e}"
 
-    # Check trending recipes
-    print("\n[2/2] Checking trending recipes...")
+        # Produce an error digest so the AI agent knows about the failure
+        error_digest_id = make_digest_id("platform-error", "instacart", timestamp)
+        error_digest = {
+            "digest_id": error_digest_id,
+            "type": "platform_error",
+            "priority": "high",
+            "title": "Instacart monitoring failed",
+            "summary": f"Instacart price monitoring encountered an error: {e}. Price alerts may be delayed.",
+            "data": {
+                "platform": "instacart",
+                "error": str(e),
+                "affected_features": ["price_monitoring", "ingredient_search"],
+            },
+            "urls": [],
+            "timestamp": timestamp,
+        }
+        all_digests.append(error_digest)
+
+    # Step 2: Check trending recipes via Allrecipes
+    print("\n[2/2] Checking trending recipes (Allrecipes)...")
     try:
         trending_digests = check_trending_recipes(config, state)
         all_digests.extend(trending_digests)
+        print(f"  Allrecipes: OK — {len(trending_digests)} trending digest(s) produced")
     except Exception as e:
-        error_msg = f"Trending check failed: {e}"
+        error_msg = f"Allrecipes trending check failed: {e}"
         print(f"  ERROR: {error_msg}")
         errors.append(error_msg)
+        platform_status["allrecipes"] = f"error: {e}"
+
+        # Produce an error digest for Allrecipes failure too
+        error_digest_id = make_digest_id("platform-error", "allrecipes", timestamp)
+        error_digest = {
+            "digest_id": error_digest_id,
+            "type": "platform_error",
+            "priority": "medium",
+            "title": "Allrecipes monitoring failed",
+            "summary": f"Allrecipes trending recipe discovery encountered an error: {e}. Recipe suggestions may be delayed.",
+            "data": {
+                "platform": "allrecipes",
+                "error": str(e),
+                "affected_features": ["trending_recipes", "recipe_discovery"],
+            },
+            "urls": [],
+            "timestamp": timestamp,
+        }
+        all_digests.append(error_digest)
 
     # Save all new digests (idempotent — skips duplicates)
     saved_count = 0
@@ -391,6 +437,7 @@ def run_once(config: dict = None) -> dict:
 
     # Update state
     state["last_run"] = timestamp
+    state["last_platform_status"] = platform_status
     save_state(state)
 
     summary = {
@@ -398,12 +445,15 @@ def run_once(config: dict = None) -> dict:
         "digests_produced": len(all_digests),
         "digests_saved": saved_count,
         "errors": errors,
+        "platform_status": platform_status,
         "state_file": str(STATE_FILE),
         "digests_file": str(DIGESTS_FILE),
     }
 
     print(f"\n{'='*50}")
     print(f"Worker run complete:")
+    print(f"  Instacart: {platform_status['instacart']}")
+    print(f"  Allrecipes: {platform_status['allrecipes']}")
     print(f"  Digests produced: {len(all_digests)}")
     print(f"  Digests saved: {saved_count}")
     if errors:

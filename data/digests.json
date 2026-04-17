@@ -58,5 +58,65 @@
       "https://www.allrecipes.com/recipe/84060/spring-vegetable-soup/"
     ],
     "timestamp": "2026-04-16T12:24:58.532531+00:00"
+  },
+  {
+    "digest_id": "trending-recipes-weekly-2026-04-17",
+    "type": "trending_recipes",
+    "priority": "low",
+    "title": "Trending Recipe Suggestions",
+    "summary": "Found 5 trending recipes that match your preferences. Top pick: Baked Pork Spring Rolls (rated 4.5/5 with 379 reviews).",
+    "data": {
+      "suggestions": [
+        {
+          "recipe_id": "6649955",
+          "title": "Baked Pork Spring Rolls",
+          "rating": 4.5,
+          "review_count": 379,
+          "url": "https://www.allrecipes.com/recipe/26706/baked-pork-spring-rolls/",
+          "image_url": "https://www.allrecipes.com/thmb/KNc1gFkZiLu_mIZnQ2Zf2o0fgqQ=/282x188/filters:no_upscale():max_bytes(150000):strip_icc():format(webp)/2333-baked-pork-spring-rolls-LynnInHk-4x3-1-ec18b0a33bd64cf39776d408b9bcaf81.jpg"
+        },
+        {
+          "recipe_id": "6581148",
+          "title": "French Spring Soup",
+          "rating": 4.5,
+          "review_count": 317,
+          "url": "https://www.allrecipes.com/recipe/50030/french-spring-soup/",
+          "image_url": "https://www.allrecipes.com/thmb/QpAYSLXZUb73ye49Tt23J96uyFw=/282x188/filters:no_upscale():max_bytes(150000):strip_icc():format(webp)/579198-0679b218ba78437784a458f90c572c48.jpg"
+        },
+        {
+          "recipe_id": "6584603",
+          "title": "Spring Asparagus Salad",
+          "rating": 4.5,
+          "review_count": 58,
+          "url": "https://www.allrecipes.com/recipe/163930/spring-asparagus-salad/",
+          "image_url": "https://www.allrecipes.com/thmb/X5u8nfMogW0txygJ5DyMiiXvT7s=/282x188/filters:no_upscale():max_bytes(150000):strip_icc():format(webp)/397482-669b926e435848a696baa1f643214ec5.jpg"
+        },
+        {
+          "recipe_id": "6650463",
+          "title": "Mongolian Beef and Spring Onions",
+          "rating": 4.5,
+          "review_count": 1203,
+          "url": "https://www.allrecipes.com/recipe/201849/mongolian-beef-and-spring-onions/",
+          "image_url": "https://www.allrecipes.com/thmb/ejUg0zEfwkB0QmNf2ybmOutyAYQ=/282x188/filters:no_upscale():max_bytes(150000):strip_icc():format(webp)/AR-201849-mongolian-beef-and-spring-onions-ddmfs-4x3-hero-f8101ac0154f4bffa773894241803042.jpg"
+        },
+        {
+          "recipe_id": "6581049",
+          "title": "Spring Vegetable Soup",
+          "rating": 4.5,
+          "review_count": 100,
+          "url": "https://www.allrecipes.com/recipe/84060/spring-vegetable-soup/",
+          "image_url": "https://www.allrecipes.com/thmb/KdBdmRvU9w5fOAI0oWqTIrBt8DE=/282x188/filters:no_upscale():max_bytes(150000):strip_icc():format(webp)/617745-aec7cd15cd2e479d8a12f59b0d9001a7.jpg"
+        }
+      ],
+      "dietary_preferences_applied": []
+    },
+    "urls": [
+      "https://www.allrecipes.com/recipe/26706/baked-pork-spring-rolls/",
+      "https://www.allrecipes.com/recipe/50030/french-spring-soup/",
+      "https://www.allrecipes.com/recipe/163930/spring-asparagus-salad/",
+      "https://www.allrecipes.com/recipe/201849/mongolian-beef-and-spring-onions/",
+      "https://www.allrecipes.com/recipe/84060/spring-vegetable-soup/"
+    ],
+    "timestamp": "2026-04-17T13:27:31.162077+00:00"
   }
 ]

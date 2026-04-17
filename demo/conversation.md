@@ -1,153 +1,155 @@
 # Foreground Agent Demo Transcript
 
-This transcript demonstrates the Qwen3.5-35B-A3B model connected to our
-MCP server completing the required conversation flow.
+This is a written transcript showing the expected conversation flow.
+For the actual live transcript produced by running the demo script,
+see `conversation_live.md`.
 
-**Model:** Qwen3.5-35B-A3B (via Groq API)
-**MCP Server:** recipe-grocery-agent
-**Date:** 2026-04-16
+**Model:** qwen/qwen3-32b (via Groq API)
+**MCP Server:** recipe-grocery-agent (streamable-http on port 8080)
+**Tools available:** 10 MCP tools
+**Date:** 2026-04-17
 
 ---
 
 **User:** I want to cook Pad Thai this weekend. Find me a good recipe.
 
-**Agent:** I'll search for Pad Thai recipes for you!
+**Agent:** [calls search_recipes(query="Pad Thai", limit=3)]
 
-[calls search_recipes(query="pad thai", limit=5)]
+Here are 3 top Pad Thai recipes:
 
-Here are some highly rated Pad Thai recipes:
-
-1. **Pad Thai** — 4.0/5 stars, 771 ratings
-   Classic Pad Thai with rice noodles, chicken, eggs, and peanuts.
+1. **Pad Thai** (4.0★, 771 reviews)
+   Classic version with rice noodles and chicken.
    https://www.allrecipes.com/recipe/42968/pad-thai/
 
-2. **Sukhothai Pad Thai** — 4.5/5 stars, 422 ratings
-   A more authentic version inspired by the Sukhothai region of Thailand.
+2. **Sukhothai Pad Thai** (4.5★, 422 reviews)
+   Regional Thai variation, slightly spicier.
    https://www.allrecipes.com/recipe/19306/sukhothai-pad-thai/
 
-3. **Authentic Pad Thai** — 4.5/5 stars, 300 ratings
-   Traditional recipe with tamarind paste and fish sauce.
-   https://www.allrecipes.com/recipe/222350/authentic-pad-thai/
+3. **Dad's Pad Thai** (4.0★, 144 reviews)
+   Family-style recipe with pork.
+   https://www.allrecipes.com/recipe/68129/dads-pad-thai/
 
-Which one would you like to make?
+Which one would you like to explore?
 
 ---
 
-**User:** Let's go with the Authentic Pad Thai.
+**User:** Let's go with the first one. Show me the full recipe details.
 
-**Agent:** Great choice! Let me get the full recipe details.
+**Agent:** [calls get_recipe(recipe_id="42968")]
 
-[calls get_recipe(url="https://www.allrecipes.com/recipe/222350/authentic-pad-thai/")]
-
-**Authentic Pad Thai**
-- Cook time: 30 mins
-- Servings: 4
-- Rating: 4.5/5 (300 reviews)
+**Pad Thai** — Serves 6 | Total: 45 mins | Rating: 3.9★
 
 **Ingredients:**
-- 1 (12 ounce) package rice noodles
+- 1 (12 oz) package rice noodles
 - 2 tablespoons butter
-- 1 pound boneless, skinless chicken breast, cut into pieces
-- 1/4 cup vegetable oil
+- 1 lb boneless, skinless chicken breast, cut into bite-sized pieces
+- ¼ cup vegetable oil
 - 4 eggs
-- 2 cups bean sprouts
-- 1/4 cup green onions, chopped
-- 3 tablespoons fish sauce
-- 1 tablespoon white sugar
-- 2 tablespoons oyster sauce
-- 1/2 teaspoon garlic powder
-- 1/4 cup crushed peanuts
+- 3 tablespoons white sugar
+- 2 tablespoons fish sauce
+- 1 tablespoon white wine vinegar
+- 3 cups bean sprouts
+- ¼ cup green onions, chopped
+- ¼ cup crushed peanuts
+
+**Instructions:**
+1. Soak rice noodles in cold water for 30-50 minutes. Drain.
+2. Heat butter in a wok, sauté chicken until browned. Remove and set aside.
+3. Heat oil, crack eggs and scramble. Add noodles, chicken, sugar, fish sauce, vinegar.
+4. Stir in bean sprouts and cook 3 minutes.
+5. Serve topped with green onions, peanuts, and lemon wedge.
+
+**Nutrition per serving:** 524 cal | 21g fat | 59g carbs | 26g protein
 
 ---
 
-**User:** How much will the ingredients cost me at Safeway?
+**User:** How much will the ingredients cost me at Safeway? I'm in zip code 94105.
 
-**Agent:** Let me check Instacart pricing for each ingredient!
+**Agent:** [calls estimate_recipe_cost(recipe_id="42968", store="Safeway", zip_code="94105")]
 
-[calls estimate_recipe_cost(url="https://www.allrecipes.com/recipe/222350/authentic-pad-thai/", store="Safeway", zip_code="94105")]
-
-Here's the ingredient cost breakdown:
+Here's the cost breakdown for Pad Thai at Safeway (94105):
 
 | Ingredient | Matched Product | Price |
 |------------|----------------|-------|
-| rice noodles | Three Ladies Rice Stick | available |
-| butter | Lucerne Butter Salted | available |
-| chicken breast | Foster Farms Chicken Breast | available |
-| vegetable oil | Signature SELECT Vegetable Oil | available |
-| eggs | Kirkland Large Eggs 24ct | available |
-| bean sprouts | Matched product found | available |
-| green onions | Matched product found | available |
+| Rice noodles | Lotus Foods Organic Pho Rice Noodles | $4.50 |
+| Butter | Great Value Butter Salted | $3.06 |
+| Chicken breast | Boneless Skinless Chicken Breast Max Pack | $4.99 |
+| Vegetable oil | Great Value Vegetable Oil 100% Pure | $3.93 |
+| Eggs | Sprouts Cage Free Large Brown Eggs | $4.19 |
+| Sugar | Signature SELECT Fine Granulated Sugar | $5.99 |
+| Fish sauce | Thai Kitchen Fish Sauce | $6.29 |
+| White wine vinegar | Pompeian Red Wine Vinegar | $2.84 |
+| Bean sprouts | Salad Cosmo Organic Mung Bean Sprouts | $2.49 |
+| Green onions | Green Onions Bunch | $0.99 |
+| Peanuts | Great Value Dry Roasted Peanuts | $2.72 |
+| Lemon | Lemon | $0.79 |
 
-**Note:** Full pricing requires Instacart authentication.
-Products are available at your local store.
+**Total estimated cost: $44.27**
+
+Note: Prices are per package as listed. Unit conversion not applied.
+Full pricing via Playwright/Instacart authentication.
 
 ---
 
 **User:** I'm allergic to peanuts. What can I substitute?
 
-**Agent:** No problem! Let me find safe peanut substitutions for you.
+**Agent:** [calls find_substitutions(ingredient="peanuts", reason="allergy", dietary_constraint="nut-free", zip_code="94105")]
 
-[calls find_substitutions(ingredient="peanuts", reason="allergy", dietary_constraint="nut-free")]
-
-Here are some great peanut-free alternatives for Pad Thai:
+Here are safe nut-free substitutions for peanuts:
 
 1. **Sunflower Seeds** (High confidence)
-   - Why it works: Similar crunch and protein content, completely nut-free
+   - Why it works: Similar crunch and protein, completely nut-free
    - Usage: Use the same quantity as peanuts
-   - Available on Instacart: Sunflower seeds found in stock
+   - Available: Great Value Roasted & Salted Sunflower Kernels — $2.58
 
 2. **Pumpkin Seeds** (High confidence)
-   - Why it works: Nut-free, similar texture and crunch
+   - Why it works: Nut-free with similar texture
    - Usage: Use the same quantity as peanuts
-   - Available on Instacart: Found in stock
+   - Available: Sprouts Organic Raw Pumpkin Seeds — $10.99
 
-Both options will give your Pad Thai that satisfying crunch without any peanuts!
+Both are widely available at Safeway (94105). Sunflower seeds are
+the more budget-friendly option at $2.58.
 
 ---
 
-**User:** Also find me a good green curry recipe and compare the two —
-what's my total shopping list going to look like?
+**User:** Also find me a good green curry recipe and compare the two. What's my total shopping list going to look like?
 
-**Agent:** Let me find a green curry recipe and compare them both!
-
-[calls search_recipes(query="green curry", limit=3)]
-[calls compare_recipes(recipe_ids=["222350", "16354974"], zip_code="94105")]
+**Agent:** [calls compare_recipes(recipe_ids=["42968", "141833"], zip_code="94105")]
 
 **Recipe Comparison:**
 
-| | Authentic Pad Thai | Thai Green Curry |
+| | Pad Thai | Thai Green Curry Chicken |
 |---|---|---|
-| Rating | 4.5/5 | 4.4/5 |
-| Cook Time | 30 mins | 25 mins |
-| Servings | 4 | 4 |
-| Ingredients | 12 | 10 |
+| Rating | 3.9★ (771 reviews) | 4.6★ |
+| Total Time | 45 mins | 50 mins |
+| Servings | 6 | 4 |
+| Calories | 524/serving | 472/serving |
+| Estimated Cost | **$44.27** | **$56.00** |
 
-**Shared Ingredients (buy once for both):**
-- fish sauce
-- vegetable oil
-- green onions
-- garlic
+**Shared Ingredients (buy once):**
+- Sugar
+- Fish sauce
 
-**Combined Shopping List:** 18 unique ingredients total
+**Combined Shopping List:** 20 unique ingredients total
+**Combined Estimated Cost: $100.27**
 
 ---
 
-**User:** Great, add everything from the combined shopping list to my
-Instacart cart.
+**User:** Great, add the rice noodles and chicken breast to my Instacart cart and show me what's in my cart.
 
-**Agent:** I'll add all the ingredients to your cart now!
-
-[calls add_to_cart(product_id="items_23036-273284", quantity=1)]
+**Agent:** [calls search_products(query="rice noodles", zip_code="94105", limit=1)]
+[calls search_products(query="chicken breast", zip_code="94105", limit=1)]
+[calls add_to_cart(product_id="items_19462-24170010", quantity=1)]
 [calls add_to_cart(product_id="items_31529-19831039", quantity=1)]
-[calls add_to_cart(product_id="items_31529-19867988", quantity=1)]
-... (adds all items)
-
 [calls get_cart()]
 
-**Your Instacart Cart:**
-- 18 items added successfully
-- All items verified as available
-- Cart is ready for checkout
+I've added the items to your cart! Here are the contents:
 
-Note: Cart uses local demo mode. To complete purchase,
-log into Instacart and your items will be ready to order.
+**Cart (2 items):**
+- Lotus Foods Organic Traditional Pho Rice Noodles × 1 @ $4.50 = $4.50
+- Boneless Skinless Chicken Breast Max Pack × 1 @ $4.99 = $4.99
+
+**Subtotal: $9.49**
+
+Note: Using local demo cart — real Instacart cart requires
+full authentication to complete checkout.
