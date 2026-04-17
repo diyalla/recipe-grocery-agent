@@ -38,8 +38,12 @@ Copy and configure the example files:
    cp config.json.example config.json
    cp .env.example .env
 
-Edit `.env` and add your Groq API key (free at console.groq.com):
-   GROQ_API_KEY=your_key_here
+Edit `.env` and add your API keys:
+   GROQ_API_KEY=your_groq_key_here
+   OPENROUTER_API_KEY=your_openrouter_key_here
+
+Get a free Groq key at console.groq.com
+Get a free OpenRouter key at openrouter.ai (required for the exact Qwen3.5-35B-A3B model)
 
 ---
 
@@ -68,6 +72,10 @@ Edit `.env` and add your Groq API key (free at console.groq.com):
 
 ### Run the live Qwen demo
    python demo/run_demo.py
+
+   Uses qwen/qwen3.5-35b-a3b via OpenRouter API (exact model specified in challenge).
+   Requires OPENROUTER_API_KEY in .env file.
+   Get a free key at openrouter.ai
 
 ### Inspect the MCP server
    mcp dev src/mcp_server.py
