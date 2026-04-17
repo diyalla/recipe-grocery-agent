@@ -176,16 +176,38 @@ def estimate_recipe_cost(
                 break
 
         if matched_product:
-            price_value = matched_product.get("price_value", 0)
-            total_estimated += price_value
+            from src.unit_converter import calculate_ingredient_cost
+            package_price = matched_product.get("price_value", 0)
+            package_size = matched_product.get("size", "")
+
+            # Attempt unit conversion to estimate actual cost
+            if parsed.quantity and parsed.unit:
+                cost_info = calculate_ingredient_cost(
+                    parsed.quantity,
+                    parsed.unit,
+                    package_price,
+                    package_size
+                )
+                estimated_cost = cost_info["cost"]
+                cost_note = cost_info["note"]
+                conversion_applied = cost_info["conversion_applied"]
+            else:
+                estimated_cost = package_price
+                cost_note = "No quantity/unit parsed — using full package price"
+                conversion_applied = False
+
+            total_estimated += estimated_cost
             ingredient_costs.append({
                 "ingredient_raw": raw_ingredient,
                 "ingredient_parsed": parsed.item,
                 "matched_product": matched_product.get("product_name"),
                 "product_price": matched_product.get("price"),
-                "price_value": price_value,
+                "package_size": package_size,
+                "price_value": package_price,
+                "estimated_cost": estimated_cost,
+                "conversion_applied": conversion_applied,
                 "match_confidence": parsed.confidence,
-                "note": "Price is per package/unit as listed — unit conversion not applied"
+                "note": cost_note,
             })
         else:
             unmatched.append(raw_ingredient)

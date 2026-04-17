@@ -6,7 +6,7 @@ import time
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from dotenv import load_dotenv
-from groq import Groq
+from openai import OpenAI
 
 load_dotenv()
 
@@ -22,8 +22,12 @@ from src.mcp_server import (
     remove_from_cart,
 )
 
-client = Groq(api_key=os.environ.get("GROQ_API_KEY"))
-MODEL = "qwen/qwen3-32b"
+# Use OpenRouter to access the exact model specified in the challenge
+client = OpenAI(
+    api_key=os.environ.get("OPENROUTER_API_KEY"),
+    base_url="https://openrouter.ai/api/v1",
+)
+MODEL = "qwen/qwen3.5-35b-a3b"
 
 TOOLS = [
     {
@@ -232,6 +236,10 @@ def chat(messages: list, retries: int = 5) -> tuple[str, list]:
                 tools=TOOLS,
                 tool_choice="auto",
                 max_tokens=1024,
+                extra_headers={
+                    "HTTP-Referer": "https://github.com/recipe-grocery-agent",
+                    "X-Title": "Recipe Grocery Agent",
+                }
             )
 
             message = response.choices[0].message

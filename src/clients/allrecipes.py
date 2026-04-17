@@ -131,6 +131,14 @@ def search_recipes(
             if cuisine.lower() not in title.lower():
                 continue
 
+        # Use image alt text as description — it's the only descriptive
+        # text available on search result cards (no summary text is rendered)
+        description = ""
+        if img_el:
+            alt = img_el.get("alt", "")
+            if alt and alt.lower() not in ["", "recipe image"]:
+                description = alt
+
         results.append({
             "recipe_id": doc_id,
             "title": title,
@@ -138,7 +146,7 @@ def search_recipes(
             "rating": rating,
             "review_count": rating_count,
             "image_url": image_url,
-            "description": "",
+            "description": description,
             "total_time": None,
         })
 

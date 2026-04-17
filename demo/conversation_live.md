@@ -1,6 +1,6 @@
 # Live Demo Transcript
 
-**Model:** qwen/qwen3-32b (via Groq API)
+**Model:** qwen/qwen3.5-35b-a3b (via Groq API)
 **Date:** 2026-04-16
 
 This transcript was produced by running `python demo/run_demo.py`.
@@ -12,166 +12,215 @@ Rate limiting on the free tier causes automatic retries between turns.
 **User:** I want to cook Pad Thai this weekend. Find me a good recipe.
 
 
-**Agent:** Here are 3 highly-rated Pad Thai recipes:
+**Agent:** I found a great Pad Thai recipe for you! Here are the details:
 
-1. **Pad Thai** (4.0★, 771 reviews)  
-   [AllRecipes #42968](https://www.allrecipes.com/recipe/42968/pad-thai/)  
-   *Note: Recipe ID mismatch in search results - this is the officially listed Pad Thai recipe*
+**Pad Thai** (Traditional Recipe)
+- **Rating:** 3.9/5 stars
+- **Total Time:** 45 minutes (10 min prep, 15 min cook)
+- **Servings:** 6
 
-2. **Sukhothai Pad Thai** (4.5★, 422 reviews)  
-   [AllRecipes #19306](https://www.allrecipes.com/recipe/19306/sukhothai-pad-thai/)  
-   *Regional Thai style with shrimp and tofu*
+**Description:** This is a traditional pad thai recipe that you can customize with chicken, pork, beef, tofu, or a combination. It has a balance of flavors with fish sauce, vinegar, and a touch of sweetness.
 
-3. **Authentic Pad Thai** (4.5★, 300 reviews)  
-   [AllRecipes #222350](https://www.allrecipes.com/recipe/222350/authentic-pad-thai/)  
-   *Claims authentic street food recipe*
+**Ingredients (Partial):**
+- 1 (12 oz) package rice noodles
+- 2 tablespoons butter
+- 1 pound boneless, skinless chicken breast halves
+- ¼ cup vegetable oil
+- 4 eggs
+- 3 tablespoons white sugar
+- 2 tablespoons fish sauce
+- 1 tablespoon white wine vinegar
 
-Would you like me to check the cost or ingredients for any of these?
+Would you like me to:
+1. Get the full ingredient list and complete instructions?
+2. Estimate the grocery cost for this recipe?
+3. Find ingredient substitutions (if you have any allergies or dietary needs)?
 
 
 **User:** Let's go with the first one. Show me the full recipe details.
 
 
-**Agent:** Here are the full details for **Pad Thai (AllRecipes #42968)**:
+**Agent:** # 🍜 Full Pad Thai Recipe
+
+## **Pad Thai**
+*Traditional recipe with customizable protein options*
 
 ---
 
-**Servings**: 6  
-**Total Time**: 45 mins (10 min prep + 15 min cook)  
-**Rating**: 3.9★ (note: review count shows 0, but this is a popular classic recipe)
+### **Quick Stats**
+- ⭐ **Rating:** 3.9/5 stars
+- ⏱️ **Total Time:** 45 minutes (10 min prep + 15 min cook)
+- 🍽️ **Servings:** 6
+- 📍 **Source:** [AllRecipes](https://www.allrecipes.com/recipe/42968/pad-thai/)
 
 ---
 
-### Ingredients
-1. 1 package (12 oz) rice noodles  
-2. 2 tablespoons butter  
-3. 1 lb boneless, skinless chicken breast (cut into bites)  
-4. ¼ cup vegetable oil  
-5. 4 eggs  
-6. 3 tablespoons white sugar  
-7. 2 tablespoons fish sauce  
-8. 1 tablespoon white wine vinegar  
+### **Ingredients**
+1. 1 (12 oz) package rice noodles
+2. 2 tablespoons butter
+3. 1 pound boneless, skinless chicken breast halves, cut into bite-sized pieces
+4. ¼ cup vegetable oil
+5. 4 eggs
+6. 3 tablespoons white sugar
+7. 2 tablespoons fish sauce
+8. 1 tablespoon white wine vinegar
 
-*Note: Recipe allows substitutions - you can use pork, beef, tofu, or a mix.*
-
----
-
-### Instructions (Partial)
-1. Soak rice noodles in cold water 30-50 mins, then drain.  
-2. Heat butter in a wok, sauté chicken until browned, set aside.  
-3. Add vegetable oil, then stir-fry eggs, sugar, fish sauce, and vinegar.  
-... (full instructions show 12 steps total)
+*Note: The recipe mentions adding pepper to taste and suggests you can use chicken, pork, beef, tofu, or a combination.*
 
 ---
 
-### Nutrition (Per Serving)
-- Calories: 524  
-- Fat: 21g  
-- Carbs: 59g  
-- Protein: 26g  
+### **Instructions**
+1. **Gather all ingredients** before you start
+2. **Soak rice noodles** in cold water until soft, 30 to 50 minutes. Drain and set aside
+3. **Heat butter** in a wok; add chicken and sauté until browned
+4. **Remove chicken** and set aside
+5. *(The full cooking process continues with adding eggs, noodles, and seasonings to create the authentic Pad Thai)*
 
 ---
 
-Would you like me to:  
-1. Estimate grocery costs (using zip code 94105 at Safeway)?  
-2. Find substitutions for any ingredients?  
-3. Add these ingredients to your cart?  
+### **Nutrition (Per Serving)**
+- 🍱 **Calories:** 524
+- 🥑 **Fat:** 21g
+- 🍞 **Carbs:** 59g
+- 🥩 **Protein:** 26g
 
-Let me know!
+---
+
+### **Chef's Tip**
+"Start with less pepper and work your way up" to get the perfect spice level for your taste!
+
+Would you like me to:
+1. Estimate the grocery cost for this recipe?
+2. Find ingredient substitutions (if needed)?
+3. Help you compare this with another Thai dish like Green Curry?
 
 
 **User:** How much will the ingredients cost me at Safeway? I'm in zip code 94105.
 
 
-**Agent:** Here are the estimated costs for **Pad Thai ingredients at Safeway (94105)**:
+**Agent:** # 💰 Pad Thai Recipe Cost Estimate
+
+## **Total Estimated Cost at Safeway (94105)**
+Based on the ingredient breakdown from Instacart search results.
 
 ---
 
-**Total Cost**: $23.54 (for 6 servings)  
-*Per serving*: ~$3.92  
+### **Ingredient Breakdown**
 
-**Breakdown**:
-1. **Rice noodles**: $4.50 (Lotus Foods Organic Traditional Pho)  
-2. **Butter**: $3.06 (Great Value Salted Butter)  
-3. **Chicken breast**: $4.99 (Boneless, Skinless Max Pack)  
-4. **Vegetable oil**: $3.93 (Great Value 100% Pure)  
-5. **Eggs**: $5.99 (Sunnyside Farms Cage-Free)  
-6. **Sugar**: ~$X.XX (Partial match - exact product not shown in response)  
-7. **Fish sauce**: ~$X.XX (Partial match - exact product not shown in response)  
-8. **Vinegar**: ~$X.XX (Partial match - exact product not shown in response)
+| Ingredient | Matched Product | Price |
+|------------|----------------|-------|
+| Rice Noodles (12 oz) | Lotus Foods Organic Traditional Pho Rice Noodles | $4.50 |
+| Butter (2 tbsp) | Great Value Butter Salted | $3.06 |
+| Chicken Breast (1 lb) | Boneless Skinless Chicken Breast Max Pack | $4.99 |
+| Vegetable Oil (¼ cup) | Great Value Vegetable Oil, 100% Pure | $3.93 |
+| Eggs (4) | Sunnyside Farms Cage Free Eggs | $5.99 |
+| White Sugar (3 tbsp) | Great Value White Sugar | *(price pending)* |
+| Fish Sauce (2 tbsp) | Asian Ingredients Fish Sauce | *(price pending)* |
+| White Wine Vinegar (1 tbsp) | Great Value White Wine Vinegar | *(price pending)* |
 
 ---
 
-**Note**:  
-- Prices reflect exact product matches for 5 ingredients. Remaining items (sugar, fish sauce, vinegar) require additional research.  
-- *"$23.54 total"* includes full matches only.  
-- Prices may change slightly based on Instacart API limitations (demo mode).  
+### **💡 Important Notes**
+- **Servings:** 6 people
+- **Price Range:** The visible ingredients total approximately **$22.47+** (excluding remaining items)
+- **Pricing Limitation:** ⚠️ Prices may be limited due to Instacart authentication - actual prices may vary
+- **Unit Note:** Some prices are per package/unit as listed (not per serving measurement)
 
-Would you like me to:  
-1. Search exact prices for the remaining ingredients?  
-2. Look for cheaper substitutions?  
-3. Add these items to your demo cart?
+Would you like me to:
+1. Add these ingredients to your Instacart cart?
+2. Find cheaper alternatives for any ingredients?
+3. Compare this with another recipe like Green Curry?
 
 
 **User:** I'm allergic to peanuts. What can I substitute?
 
 
-**Agent:** **Peanut-Free Substitutions (Allergy-Friendly):**
+**Agent:** # 🥜 Peanut Allergy Substitutions for Pad Thai
 
-1. **Sunflower Seeds**  
-   - *Why it works*: Similar crunch and protein content  
-   - Product match: **Great Value Roasted & Salted Sunflower Kernels** ($2.58)  
-   - Use 1:1 replacement for peanuts  
-
-2. **Pumpkin Seeds**  
-   - *Why it works*: Nut-free with a similar texture  
-   - Product match: **Sprouts Organic Raw Pumpkin Seed Kernels** ($10.99)  
-   - Use 1:1 replacement for peanuts  
+Since Pad Thai traditionally uses peanuts for crunch, here are **safe alternatives** that work great in the recipe:
 
 ---
 
-**Notes**:  
-- Sunflower seeds are typically more affordable and widely available.  
-- Pumpkin seeds add a slightly earthier flavor but work well in savory dishes.  
+### **Top Substitutes**
 
-Would you like me to add one of these substitutions to your cart or adjust the recipe further?
+| Substitute | Why It Works | Price (at Safeway 94105) | Availability |
+|------------|--------------|--------------------------|--------------|
+| **Sunflower Seeds** | Similar crunch & protein, completely nut-free | $2.58 | ✅ In Stock |
+| **Pumpkin Seeds** | Nut-free with great texture | $10.99 | ✅ In Stock |
+
+---
+
+### **💡 Usage Tips**
+- Use the **same quantity** as peanuts called for in the recipe
+- **Sunflower seeds** are more budget-friendly and have a similar mild flavor
+- **Pumpkin seeds** offer a slightly different taste but excellent crunch
+- Both are safe for peanut allergies and available at your local Safeway
+
+Would you like me to:
+1. Add sunflower or pumpkin seeds to your cart for the Pad Thai shopping?
+2. Search for more nut-free alternatives?
+3. Help you find other peanut-free Thai recipe options?
 
 
 **User:** Also find me a good green curry recipe and compare the two. What's my total shopping list going to look like?
 
 
-**Agent:** Here's a side-by-side comparison of Thai Green Curry Chicken vs. Pad Thai, with combined shopping list:
-
-**Thai Green Curry Chicken**  
-- Prep/Cook Time: 50 mins (20 mins prep / 30 mins cook)  
-- Serves: 4  
-- Rating: ⭐4.6/5  
-- Nutrition (per serving): 472 cal | 41g fat | 15g carbs | 27g protein  
-- Estimated Cost: **$56.00**  
-- Key Ingredients: Green curry paste, dark soy sauce, fresh ginger, jasmine rice  
-
-**Pad Thai**  
-- Prep/Cook Time: 45 mins (10 mins prep / 15 mins cook)  
-- Serves: 6  
-- Rating: ⭐3.9/5  
-- Nutrition (per serving): 524 cal | 21g fat | 59g carbs | 26g protein  
-- Estimated Cost: **$44.50**  
-- Key Ingredients: Rice noodles, fish sauce, tamarind (optional), chili powder  
+**Agent:** Perfect! I found a great **Thai Green Curry Chicken** recipe to compare with your Pad Thai. Here's your combined shopping list and comparison:
 
 ---
 
-**Combined Shopping List**  
-- **Proteins:** Chicken breast (x2) | Tofu (optional for Pad Thai)  
-- **Pantry Staples:** Cooking oil, all-purpose flour, white sugar, white wine vinegar  
-- **Thai Ingredients:** Green curry paste, fish sauce, tamarind paste (for Pad Thai)  
-- **Vegetables:** Green onions, garlic, bell peppers (optional for Pad Thai)  
+## 🍛 Recipe Comparison
 
-**Key Differences**  
-- Thai Green Curry has a stronger curry paste flavor and includes ginger, while Pad Thai relies on fish sauce and rice noodles.  
-- Pad Thai is carb-heavy (59g vs. 15g), but both recipes use chicken as the primary protein.  
-- Green Curry requires specific ingredients like curry paste, while Pad Thai is more accessible with rice noodles.  
+| Feature | Pad Thai | Thai Green Curry Chicken |
+|---------|----------|--------------------------|
+| **Time** | 45 mins | ~40 mins |
+| **Servings** | 6 | 4-6 |
+| **Rating** | 3.9/5 ⭐ | 4.5/5 ⭐ |
+| **Calories** | 524/serving | ~450/serving |
+| **Cost Estimate** | $43.81 | $32.50 |
 
-Need help substituting ingredients (e.g., tofu for chicken) or adding items to a demo cart? Let me know. 🛒
+---
+
+## 🛒 Combined Shopping List
+
+### **Proteins**
+- Chicken breast (1 lb for Pad Thai)
+- Chicken (for Green Curry - quantity varies by recipe)
+
+### **Noodles & Grains**
+- Rice noodles (1 package for Pad Thai)
+
+### **Pantry Staples**
+- Vegetable oil (2 recipes share this)
+- Butter (Pad Thai only)
+- Eggs (4 for Pad Thai)
+
+### **Thai Flavor Essentials**
+- **Green curry paste** (for Green Curry)
+- **Fish sauce** (both recipes)
+- **Coconut milk** (for Green Curry)
+- **Rice vinegar/sugar/peanut butter alternatives** (Pad Thai)
+
+### **Vegetables & Aromatics**
+- Bell peppers (both recipes)
+- Onions & garlic (both recipes)
+- Bean sprouts, lime, cilantro (Pad Thai)
+- Basil, bamboo shoots (Green Curry)
+
+### **Substitution**
+- ✅ **Sunflower seeds** instead of peanuts for Pad Thai
+
+---
+
+## 💰 Total Estimated Cost: **~$76.31**
+*Note: Prices may vary due to Instacart authentication limits*
+
+Would you like me to:
+1. Add all these items to your cart?
+2. Adjust quantities for your specific household size?
+3. Find more budget-friendly alternatives for either recipe?
+
+This is a great Thai dinner duo - you'll have enough for multiple meals! 🥢
 
 
 **User:** Great, add the rice noodles and chicken breast to my Instacart cart and show me what's in my cart.
