@@ -125,7 +125,7 @@ Get a free OpenRouter key at openrouter.ai (required for the exact Qwen3.5-35B-A
 3. Session cookies are cached to `data/instacart_session.json` for 1 hour
 4. The Instacart client applies these cookies to all GraphQL requests
 5. Real pricing data is now available for all product searches
-6. The user talks to Qwen3.5-35B-A3B via Groq API
+6. The user talks to Qwen3.5-35B-A3B via OpenRouter API
 7. Qwen connects to our MCP server and sees 10 available tools
 8. Qwen calls tools like `search_recipes` or `estimate_recipe_cost`
 9. The MCP server calls our Allrecipes and Instacart clients
@@ -191,8 +191,9 @@ With Playwright authentication, `estimate_recipe_cost` returns real prices:
 - Cuisine and dietary filters applied post-fetch where possible.
 
 ### Ingredient Parser
-- Unit conversion between volume, weight, and count is not applied when
-  estimating recipe costs. Prices are per package as listed on Instacart.
+- Unit conversion is implemented for volume and weight units.
+  Cross-dimension conversion (e.g. cups to oz) requires ingredient
+  density data and is not applied — falls back to full package price.
 - Complex compound ingredients may parse with lower confidence scores.
 
 ### Background Worker

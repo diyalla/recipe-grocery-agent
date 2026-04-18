@@ -1,7 +1,7 @@
 # Live Demo Transcript
 
-**Model:** qwen/qwen3.5-35b-a3b (via Groq API)
-**Date:** 2026-04-16
+**Model:** qwen/qwen3.5-35b-a3b (via OpenRouter API)
+**Date:** 2026-04-18
 
 This transcript was produced by running `python demo/run_demo.py`.
 The Qwen model is connected to our MCP tools via Groq's function calling API.
