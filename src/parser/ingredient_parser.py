@@ -69,7 +69,8 @@ PREPARATION_WORDS = {
     "mashed", "pureed", "ground", "crumbled", "beaten", "whipped",
     "melted", "softened", "toasted", "roasted", "cooked", "drained",
     "rinsed", "thawed", "divided", "sifted", "packed", "heaping",
-    "leveled", "softened", "room temperature",
+    "leveled", "softened", "room temperature", "cubes", "chunks",
+    "pieces", "strips", "rings", "florets", "wedges",
 }
 
 # Phrases that indicate preparation instructions — words after these
@@ -93,6 +94,8 @@ MODIFIER_WORDS = {
 FILLER_WORDS = {
     "halves", "half", "pieces", "piece", "chunks", "chunk",
     "strips", "strip", "bits", "bite-sized", "sized",
+    "inch", "inches", "cm", "centimeter", "centimeters",
+    "1", "2", "3", "4", "5",
 }
 
 WORD_TO_NUM = {
@@ -240,7 +243,10 @@ def parse_ingredient(raw: str) -> ParsedIngredient:
     if unit is None and paren_unit:
         unit = paren_unit
 
-    # Split ALL segments by comma
+    # Split ALL segments by comma or dash (dash often separates prep instructions)
+    # e.g. "chicken breast halves - cut into 1 inch cubes"
+    # First normalize " - " to a comma so our existing logic handles it
+    text = re.sub(r'\s+-\s+', ', ', text)
     # e.g. "boneless, skinless chicken breast halves, cut into pieces"
     # becomes ["boneless", "skinless chicken breast halves", "cut into pieces"]
     segments = [s.strip() for s in text.split(",")]
