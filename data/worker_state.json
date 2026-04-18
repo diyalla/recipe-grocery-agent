@@ -1,19 +1,28 @@
 {
   "last_prices": {
-    "rice noodles": 4.5,
-    "butter": 3.06,
-    "chicken breast": 4.99,
-    "vegetable oil": 3.93,
-    "eggs": 5.99,
+    "rice noodles": 2.19,
+    "butter": 4.69,
+    "chicken breast": 12.49,
+    "vegetable oil": 4.69,
+    "eggs": 6.99,
     "sugar": 5.99,
-    "distilled vinegar": 5.49,
-    "fish sauce": 6.29,
-    "tamarind paste": 12.99
+    "distilled vinegar": 6.99,
+    "fish sauce": 10.79,
+    "tamarind paste": 7.79
   },
-  "last_run": "2026-04-17T14:45:17.290095+00:00",
+  "last_run": "2026-04-18T17:47:56.128575+00:00",
   "submitted_digest_ids": [
     "trending-recipes-weekly-2026-04-16",
-    "trending-recipes-weekly-2026-04-17"
+    "trending-recipes-weekly-2026-04-17",
+    "price-alert-rice-noodles-2026-04-18",
+    "price-alert-butter-2026-04-18",
+    "price-alert-chicken-breast-2026-04-18",
+    "price-alert-vegetable-oil-2026-04-18",
+    "price-alert-eggs-2026-04-18",
+    "price-alert-distilled-vinegar-2026-04-18",
+    "price-alert-fish-sauce-2026-04-18",
+    "price-alert-tamarind-paste-2026-04-18",
+    "trending-recipes-weekly-2026-04-18"
   ],
   "last_platform_status": {
     "instacart": "ok",
