@@ -452,8 +452,27 @@ def compare_recipes(
         if len(item["used_in"]) > 1
     ]
 
-    # Combined cost estimate (shared ingredients counted once)
-    combined_cost = sum(r.get("estimated_cost", 0) for r in recipes)
+    # Combined cost — deduplicate shared ingredients
+    # Shared ingredients are counted once at the higher price
+    shared_item_keys = {
+        item["item"].lower().strip()
+        for item in all_ingredients.values()
+        if len(item["used_in"]) > 1
+    }
+
+    combined_cost = 0.0
+    shared_cost_counted = set()
+
+    for recipe in recipes:
+        for cost_item in recipe.get("cost_breakdown", []):
+            item_key = cost_item.get("ingredient", "").lower().strip()
+            if item_key in shared_item_keys:
+                if item_key not in shared_cost_counted:
+                    # Count shared ingredient only once
+                    combined_cost += cost_item.get("price_value", 0)
+                    shared_cost_counted.add(item_key)
+            else:
+                combined_cost += cost_item.get("price_value", 0)
 
     return json.dumps({
         "recipes": recipes,

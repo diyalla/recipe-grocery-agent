@@ -201,3 +201,82 @@ def refresh_session_if_needed(session) -> bool:
         apply_session_to_requests(session, cookies)
         return True
     return False
+
+
+def get_instacart_cart_id() -> str:
+    """
+    Use Playwright to get the user's active Instacart cart ID.
+    Loads the cart page and intercepts the GraphQL response.
+    Returns the cart ID string or None if not found.
+    """
+    try:
+        from playwright.sync_api import sync_playwright
+        import re
+
+        print("  Getting Instacart cart ID via Playwright...")
+
+        with sync_playwright() as p:
+            browser = p.chromium.launch(
+                headless=True,
+                args=["--no-sandbox", "--disable-blink-features=AutomationControlled"]
+            )
+
+            context = browser.new_context(
+                user_agent=(
+                    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+                    "AppleWebKit/537.36 (KHTML, like Gecko) "
+                    "Chrome/120.0.0.0 Safari/537.36"
+                ),
+                viewport={"width": 1280, "height": 800}
+            )
+
+            # Load saved cookies
+            if CREDENTIALS_FILE.exists():
+                with open(CREDENTIALS_FILE) as f:
+                    data = json.load(f)
+                cookies = data.get("cookies", [])
+                if cookies:
+                    context.add_cookies(cookies)
+
+            cart_id = None
+
+            def handle_response(response):
+                nonlocal cart_id
+                if "graphql" in response.url and cart_id is None:
+                    try:
+                        body = response.json()
+                        # Look for cart_id in any response
+                        body_str = json.dumps(body)
+                        matches = re.findall(r'"cart_id":\s*"(\d+)"', body_str)
+                        if matches:
+                            cart_id = matches[0]
+                    except Exception:
+                        pass
+
+            page = context.new_page()
+            page.on("response", handle_response)
+
+            page.goto(
+                "https://www.instacart.com/store/checkout",
+                wait_until="domcontentloaded",
+                timeout=20000
+            )
+            time.sleep(3)
+
+            browser.close()
+
+            if cart_id:
+                print(f"  Found cart ID: {cart_id}")
+                # Save cart ID to session file
+                if CREDENTIALS_FILE.exists():
+                    with open(CREDENTIALS_FILE) as f:
+                        data = json.load(f)
+                    data["cart_id"] = cart_id
+                    with open(CREDENTIALS_FILE, "w") as f:
+                        json.dump(data, f, indent=2)
+
+            return cart_id
+
+    except Exception as e:
+        print(f"  Could not get cart ID: {e}")
+        return None
